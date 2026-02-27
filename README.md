@@ -1,89 +1,60 @@
-/*
-=====================================================
-SQL CUSTOMER BEHAVIOR ANALYSIS (MySQL)
-Author: Sean Codner
-Objective: Evaluate customer purchasing patterns and concentration risk
-Assumed Tables: orders, customers
-=====================================================
-*/
+# SQL Customer Behavior Analysis
 
--- 1) Top 10 customers by total units
-SELECT
-    c.customer_id,
-    c.customer_name,
-    SUM(o.units) AS total_units
-FROM orders o
-JOIN customers c
-    ON c.customer_id = o.customer_id
-GROUP BY c.customer_id, c.customer_name
-ORDER BY total_units DESC
-LIMIT 10;
+## Overview
+This project analyzes customer purchasing behavior using transactional order data.  
+The objective is to identify customer segments based on order frequency, purchase volume, and average order size to support retention and revenue strategy.
 
--- 2) Customers with more than 5 orders
-SELECT
-    c.customer_id,
-    c.customer_name,
-    COUNT(o.order_id) AS total_orders
-FROM orders o
-JOIN customers c
-    ON c.customer_id = o.customer_id
-GROUP BY c.customer_id, c.customer_name
-HAVING COUNT(o.order_id) > 5
-ORDER BY total_orders DESC;
+---
 
--- 3) Customers with avg units per order > 3
-SELECT
-    c.customer_id,
-    c.customer_name,
-    AVG(o.units) AS avg_units_per_order
-FROM orders o
-JOIN customers c
-    ON c.customer_id = o.customer_id
-GROUP BY c.customer_id, c.customer_name
-HAVING AVG(o.units) > 3
-ORDER BY avg_units_per_order DESC;
+## Business Objectives
 
--- 4) High-frequency, low-volume customers (example thresholds)
-SELECT
-    c.customer_id,
-    c.customer_name,
-    COUNT(o.order_id) AS total_orders,
-    SUM(o.units) AS total_units
-FROM orders o
-JOIN customers c
-    ON c.customer_id = o.customer_id
-GROUP BY c.customer_id, c.customer_name
-HAVING COUNT(o.order_id) >= 5 AND SUM(o.units) <= 10
-ORDER BY total_orders DESC;
+- Identify high-value and high-frequency customers  
+- Detect bulk purchasers vs repeat purchasers  
+- Quantify customer concentration risk  
+- Segment customers by purchasing patterns  
 
--- 5) One-time buyers with high units (bulk purchasers)
-SELECT
-    c.customer_id,
-    c.customer_name,
-    COUNT(o.order_id) AS total_orders,
-    SUM(o.units) AS total_units
-FROM orders o
-JOIN customers c
-    ON c.customer_id = o.customer_id
-GROUP BY c.customer_id, c.customer_name
-HAVING COUNT(o.order_id) = 1 AND SUM(o.units) >= 10
-ORDER BY total_units DESC;
+---
 
--- 6) Concentration: % of total units from top 10 customers
-SELECT
-    ROUND(
-        100 * (
-            SELECT SUM(t.total_units)
-            FROM (
-                SELECT
-                    c.customer_id,
-                    SUM(o.units) AS total_units
-                FROM orders o
-                JOIN customers c
-                    ON c.customer_id = o.customer_id
-                GROUP BY c.customer_id
-                ORDER BY total_units DESC
-                LIMIT 10
-            ) t
-        ) / (SELECT SUM(units) FROM orders),
-    2) AS top10_pct_of_total_units;
+## Dataset Assumptions
+
+**orders**  
+(order_id, customer_id, order_date, units)
+
+**customers**  
+(customer_id, customer_name, region)
+
+---
+
+## Key Analyses Performed
+
+1. Top 10 customers by total units  
+2. Customers with more than 5 orders  
+3. Customers with average units per order > 3  
+4. High-frequency, low-volume customers  
+5. One-time bulk purchasers  
+6. Customer concentration (Top 10 % of total units)
+
+---
+
+## Tools Used
+
+- MySQL  
+- SQL  
+
+---
+
+## Skills Demonstrated
+
+- Aggregation (SUM, COUNT, AVG)  
+- Behavioral segmentation  
+- Business metric design  
+- Relational joins  
+- Analytical filtering (HAVING)  
+
+---
+
+## How to Run
+
+1. Load the assumed schema into MySQL.
+2. Execute the queries in `analysis.sql`.
+3. Review output tables to evaluate customer behavior patterns.
